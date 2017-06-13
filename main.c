@@ -1,17 +1,13 @@
 //
 // Created by hector on 12/06/17.
 //
-/*
-    C socket server example, handles multiple clients using threads
-*/
-
 #include<stdio.h>
-#include<string.h>    //strlen
-#include<stdlib.h>    //strlen
+#include<string.h>    
+#include<stdlib.h>
 #include<sys/socket.h>
-#include<arpa/inet.h> //inet_addr
-#include<unistd.h>    //write
-#include<pthread.h> //for threading , link with lpthread
+#include<arpa/inet.h>
+#include<unistd.h>
+#include<pthread.h>
 
 //the thread function
 void *connection_handler(void *);
