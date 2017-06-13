@@ -20,7 +20,8 @@ void *sockets_thread(void *);
 
 int start = 0;
 int game_over = 0;
-int *TIME_TO_START = (int *) 15;
+int number_players = 0;
+int *TIME_TO_START = (int *) 30;
 
 int main(int argc, char *argv[]) {
     int *socket_desc;
@@ -58,21 +59,23 @@ int main(int argc, char *argv[]) {
         game_over = 0;
         start = 0;
         //Accept and incoming connection
-        puts("Esperando jugadores...");
 
-        // Hilo que ejecuta la cuenta atrás para empezar a jugar
-        pthread_t sniffer_thread;
-        if (pthread_create(&sniffer_thread, NULL, start_timer, TIME_TO_START) < 0) {
-            perror("could not create thread");
-            return 1;
+
+        if(number_players>0) {
+            // Hilo que ejecuta la cuenta atrás para empezar a jugar
+            pthread_t sniffer_thread;
+            if (pthread_create(&sniffer_thread, NULL, start_timer, TIME_TO_START) < 0) {
+                perror("could not create thread");
+                return 1;
+            }
+
+            // Cuando el juego acaba se reinicia la partida
+            while (!game_over) {
+
+            }
+            puts("Reiniciando...");
+            sleep(10);
         }
-
-        // Cuando el juego acaba se reinicia la partida
-        while (!game_over) {
-
-        }
-        puts("Reiniciando...");
-        sleep(10);
 
     }
     return 0;
@@ -87,7 +90,7 @@ void *sockets_thread(void *socket_desc) {
 
     //Listen
     listen((int) socket_desc, 3);
-
+    puts("Esperando jugadores...");
     while ((client_sock = accept((int) socket_desc, (struct sockaddr *) &client, (socklen_t *) &c))) {
         puts("Connection accepted");
         new_sock = malloc(1);
@@ -98,6 +101,7 @@ void *sockets_thread(void *socket_desc) {
             perror("could not create thread");
         }
         puts("Jugador conectado");
+        number_players++;
     }
 
 
@@ -160,7 +164,7 @@ void *connection_handler(void *socket_desc) {
     while ((read_size = (int) recv(sock, client_message, 2000, 0)) > 0) {
         if (!game_over) {
             number_of_lifes = atoi(client_message);
-            printf("Vidas: %s", client_message);
+            //printf("Vidas: %s\n", client_message);
             if (atoi(client_message) == 0) {
                 game_over = 1;
                 break;
@@ -184,5 +188,6 @@ void *connection_handler(void *socket_desc) {
         write(sock, "L\n", strlen("L\n"));
     }
     shutdown(sock, 2);
+    number_players--;
     return 0;
 }
